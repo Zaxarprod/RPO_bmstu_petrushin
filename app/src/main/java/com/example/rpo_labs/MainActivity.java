@@ -18,8 +18,14 @@ import com.example.rpo_labs.databinding.ActivityMainBinding;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.io.IOUtils;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity implements TransactionEvents {
 
@@ -37,11 +43,12 @@ public class MainActivity extends AppCompatActivity implements TransactionEvents
         it.putExtra("ptc", ptc);
         it.putExtra("amount", amount);
         synchronized (MainActivity.this) {
-            activityResultLauncher.launch(it);
+            //activityResultLauncher.launch(it);
+            testHttpClient();
             try {
                 MainActivity.this.wait();
             } catch (Exception ex) {
-                //todo: log error
+                Log.e("MainActivity wait", ex.toString());
             }
         }
         return pin;
@@ -131,6 +138,39 @@ public class MainActivity extends AppCompatActivity implements TransactionEvents
         //startActivity(it);
         //activityResultLauncher.launch(it);
     }
+
+    protected void testHttpClient()
+    {
+        new Thread(() -> {
+            try {
+                HttpURLConnection uc = (HttpURLConnection)
+                        (new URL("http://10.0.2.2:8080/api/v1/title").openConnection());
+
+                InputStream inputStream = uc.getInputStream();
+                String html = IOUtils.toString(inputStream);
+                String title = getPageTitle(html);
+                runOnUiThread(() ->
+                {
+                    Toast.makeText(this, title, Toast.LENGTH_LONG).show();
+                });
+            } catch (Exception ex) {
+                Log.e("errtag", "Http client fails", ex);
+            }
+        }).start();
+    }
+
+
+    protected String getPageTitle(String html) {
+        Pattern pattern = Pattern.compile("<title>(.+?)</title>", Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(html);
+        String p;
+        if (matcher.find())
+            p = matcher.group(1);
+        else
+            p = "Not found";
+        return p;
+    }
+
 
     /**
      * A native method that is implemented by the 'rpo_labs' native library,
