@@ -7,12 +7,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import rpo_labs.backend.models.Museum;
+import rpo_labs.backend.models.Painting;
 import rpo_labs.backend.repositories.MuseumRepository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("api/v1")
@@ -23,6 +21,16 @@ public class MuseumController {
     @GetMapping("/museums")
     public List getAllCountries() {
         return museumRepository.findAll();
+    }
+
+    @GetMapping("/museums/{id}/paintings")
+    public ResponseEntity<List<Painting>> getPaintingMuseums(@PathVariable(value = "id") Long museumID) {
+        Optional<Museum> cc = museumRepository.findById(museumID);
+        if (cc.isPresent()) {
+            return ResponseEntity.ok(cc.get().paintings);
+        }
+
+        return ResponseEntity.ok(new ArrayList<Painting>());
     }
 
     @PostMapping("/museums")
@@ -37,10 +45,8 @@ public class MuseumController {
             } else {
                 error = exception.getMessage();
             }
-
             Map<String, String> map = new HashMap<>();
             map.put("error", error + "\n");
-
             return ResponseEntity.ok(map);
         }
     }
@@ -50,7 +56,6 @@ public class MuseumController {
                                                 @RequestBody Museum museumDetails) {
         Museum museum = null;
         Optional<Museum> cc = museumRepository.findById(museumID);
-
         if (cc.isPresent()) {
             museum = cc.get();
 
@@ -68,15 +73,12 @@ public class MuseumController {
     public ResponseEntity<Object> deleteCountry(@PathVariable(value = "id") Long museumID) {
         Optional<Museum> museum = museumRepository.findById(museumID);
         Map<String, Boolean> resp = new HashMap<>();
-
-        // Возвратит true, если объект существует (не пустой)
         if (museum.isPresent()) {
             museumRepository.delete(museum.get());
             resp.put("deleted", Boolean.TRUE);
         } else {
             resp.put("deleted", Boolean.FALSE);
         }
-
         return ResponseEntity.ok(resp);
     }
 }
