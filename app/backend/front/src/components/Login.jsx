@@ -1,24 +1,27 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import BackendService from "../services/BackendService";
-import Utils from "../utils/Utils";
+import { userActions } from "../utils/store";
 
 export const Login = () => {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState(null)
+  const [error, setError] = useState(null);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  const dispatch = useDispatch();
 
   const onChangeLogin = (e) => {
     setUsername(e.target.value);
-  }
+  };
 
   const onChangePassword = (e) => {
     setPassword(e.target.value);
-  }
+  };
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -29,18 +32,17 @@ export const Login = () => {
     BackendService.login(username, password)
       .then((resp) => {
         console.log(resp.data);
-        Utils.saveUser(resp.data);
+        setLoggingIn(false);
+        dispatch(userActions.login(resp.data));
         navigate("/home");
       })
       .catch((err) => {
-        if (err.response && err.response.status === 401) {
-          setError("Auth error");
-        }
+        if (err.response && err.response.status === 401)
+          setError("Ошибка авторизации");
         else setError(err.message);
-
         setLoggingIn(false);
       });
-  }
+  };
 
   return (
     <div className="col-md-6 me-0">
@@ -78,11 +80,9 @@ export const Login = () => {
             <div className="help-block text-danger">Введите пароль</div>
           )}
         </div>
-        {
-          error && <div className="alert alert-danger mt-1 me-0 ms-0">
-              {error}
-          </div>
-        }
+        {error && (
+          <div className="alert alert-danger mt-1 me-0 ms-0">{error}</div>
+        )}
         <div className="form-group mt-2">
           <button className="btn btn-primary">
             {loggingIn && (
@@ -98,4 +98,4 @@ export const Login = () => {
       </form>
     </div>
   );
-}
+};

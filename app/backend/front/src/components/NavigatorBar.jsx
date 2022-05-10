@@ -5,11 +5,15 @@ import { faHome, faUser } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate } from "react-router-dom";
 import Utils from "../utils/Utils";
 import BackendService from "../services/BackendService";
+import { useDispatch, useSelector } from "react-redux";
+import { userActions } from "../utils/store";
 
 const NavigationBar = () => {
   const navigate = useNavigate();
 
-  const uname = Utils.getUserName();
+  const dispatch = useDispatch();
+
+  const uname = useSelector((state)=>state.authentication.user)
 
   const goHome = () => {
     navigate("/home");
@@ -17,10 +21,11 @@ const NavigationBar = () => {
 
   const logout = () => {
     BackendService.logout().then(() => {
-        Utils.removeUser();
-        goHome()
-        });
-  }
+      Utils.removeUser();
+      dispatch(userActions.logout());
+      navigate("Login");
+    });
+  };
 
   return (
     <Navbar bg="light" expand="lg">
@@ -35,7 +40,7 @@ const NavigationBar = () => {
           </Nav.Link>
           <Nav.Link onClick={goHome}>Another Home</Nav.Link>
         </Nav>
-        <Navbar.Text>{uname}</Navbar.Text>
+        <Navbar.Text>{uname?.login}</Navbar.Text>
         {uname && (
           <Nav.Link onClick={logout}>
             <FontAwesomeIcon icon={faUser} fixedWidth /> Выход
