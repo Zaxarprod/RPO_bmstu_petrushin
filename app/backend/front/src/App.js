@@ -3,6 +3,8 @@ import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import NavigationBar from "./components/NavigatorBar";
 import { Home } from "./components/Home";
+import { Login } from "./components/Login";
+
 function App() {
   return (
     <div className="App">
@@ -10,6 +12,7 @@ function App() {
         <NavigationBar />
         <div className="container-fluid">
           <Routes>
+            <Route path="/login" element={<Login />} />
             <Route path="/home" element={<Home />} />
           </Routes>
         </div>

@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/auth")
 public class LoginController {
@@ -49,14 +50,13 @@ public class LoginController {
                 // Если захешированный пароль из базы совпадает с просчитанным паролем, то формируем рандомный токен
                 if (hash1.toLowerCase().equals(hash2.toLowerCase())) {
                     String token = UUID.randomUUID().toString();
-                    u2.token = token.toString();
-
+                    u2.token = token;
                     // Добавляем активность пользователя - текущее время
                     u2.activity = LocalDateTime.now();
 
                     // Сохраняем информацию (save просто записывает, flush применяет все изменения)
                     User u3 = usersRepository.saveAndFlush(u2);
-                    return new ResponseEntity<Object>(u3.token, HttpStatus.OK);
+                    return new ResponseEntity<Object>(u3, HttpStatus.OK);
                 }
             }
         }
