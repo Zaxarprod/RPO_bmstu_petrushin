@@ -12,7 +12,7 @@ import rpo_labs.backend.repositories.MuseumRepository;
 import rpo_labs.backend.repositories.UserRepository;
 
 import java.util.*;
-
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("api/v1")
 public class UserController {

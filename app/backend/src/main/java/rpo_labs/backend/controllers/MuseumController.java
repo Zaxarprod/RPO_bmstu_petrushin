@@ -11,7 +11,7 @@ import rpo_labs.backend.models.Painting;
 import rpo_labs.backend.repositories.MuseumRepository;
 
 import java.util.*;
-
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("api/v1")
 public class MuseumController {

@@ -1,14 +1,15 @@
 import React from "react";
 import { Navbar, Nav } from "react-bootstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHome, faUser } from "@fortawesome/free-solid-svg-icons";
+import { faBars, faHome, faUser } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate } from "react-router-dom";
 import Utils from "../utils/Utils";
 import BackendService from "../services/BackendService";
 import { useDispatch, useSelector } from "react-redux";
 import { userActions } from "../utils/store";
 
-const NavigationBar = () => {
+const NavigationBar = (props) => {
+  const {toggleSideBar} = props
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
@@ -29,6 +30,11 @@ const NavigationBar = () => {
 
   return (
     <Navbar bg="light" expand="lg">
+      <button type="button"
+              className="btn btn-outline-secondary mr-2"
+              onClick={toggleSideBar}>
+          <FontAwesomeIcon icon={faBars} />
+      </button>
       <Navbar.Brand>
         <FontAwesomeIcon icon={faHome} /> My RPO
       </Navbar.Brand>
