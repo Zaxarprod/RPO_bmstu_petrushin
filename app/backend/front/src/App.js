@@ -9,6 +9,15 @@ import { useSelector } from "react-redux";
 import { SideBar } from "./components/SideBar";
 import { CountryListComponent } from "./components/CountryListComponent";
 import CountryComponent from "./components/CountryComponent";
+import MyAccountComponent from "./components/MyAccountComponent";
+import { MuseumListComponent } from "./components/MuseumListComponent";
+import { ArtistListComponent } from "./components/ArtistListComponent";
+import { PaintingListComponent } from "./components/PaintingListComponent";
+import { UserListComponent } from "./components/UserListComponent";
+import PaintingComponent from "./components/PaintingComponent";
+import ArtistComponent from "./components/ArtistComponent";
+import MuseumComponent from "./components/MuseumComponent";
+import UserComponent from "./components/UserComponent";
 
 const ProtectedRoute = ({ children }) => {
   let user = Utils.getUser();
@@ -51,6 +60,78 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CountryComponent />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="account"
+                element={
+                  <ProtectedRoute>
+                    <MyAccountComponent />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/museums"
+                element={
+                  <ProtectedRoute>
+                    <MuseumListComponent />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/artists"
+                element={
+                  <ProtectedRoute>
+                    <ArtistListComponent />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/paintings"
+                element={
+                  <ProtectedRoute>
+                    <PaintingListComponent />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/users"
+                element={
+                  <ProtectedRoute>
+                    <UserListComponent />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="paintings/:id"
+                element={
+                  <ProtectedRoute>
+                    <PaintingComponent />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="artists/:id"
+                element={
+                  <ProtectedRoute>
+                    <ArtistComponent />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="museums/:id"
+                element={
+                  <ProtectedRoute>
+                    <MuseumComponent />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="users/:id"
+                element={
+                  <ProtectedRoute>
+                    <UserComponent />
                   </ProtectedRoute>
                 }
               />

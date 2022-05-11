@@ -13,23 +13,95 @@ class BackendService {
     });
   }
 
+  //Countries
 
   retrieveAllCountries(page, limit) {
-    return axios.get(`${API_URL}/countries`);
-}
-retrieveCountry(id) {
+    return axios.get(`${API_URL}/countries?page=${page ?? 0}&limit=${limit}`);
+  }
+  retrieveCountry(id) {
     return axios.get(`${API_URL}/countries/${id}`);
-}
-createCountry(country) {
+  }
+  createCountry(country) {
     return axios.post(`${API_URL}/countries`, country);
-}
-updateCountry(country) {
+  }
+  updateCountry(country) {
     return axios.put(`${API_URL}/countries/${country.id}`, country);
-}
-deleteCountries(countries) {
+  }
+  deleteCountries(countries) {
     return axios.post(`${API_URL}/deletecountries`, countries);
-}
+  }
 
+  //Artists
+
+  retrieveAllArtists(page, limit) {
+    return axios.get(`${API_URL}/artists?page=${page ?? 0}&limit=${limit}`);
+  }
+  retrieveArtist(id) {
+    return axios.get(`${API_URL}/artists/${id}`);
+  }
+  createArtist(artist) {
+    return axios.post(`${API_URL}/artistsssss`, artist);
+  }
+  updateArtist(artist) {
+    return axios.put(`${API_URL}/artists/${artist.id}`, artist);
+  }
+  deleteArtists(artists) {
+    return axios.post(`${API_URL}/deleteartists`, artists);
+  }
+
+  //Museums
+
+  retrieveAllMuseums(page, limit) {
+    return axios.get(`${API_URL}/museums?page=${page ?? 0}&limit=${limit}`);
+  }
+  retrieveMuseum(id) {
+    return axios.get(`${API_URL}/museums/${id}`);
+  }
+  createMuseum(museum) {
+    return axios.post(`${API_URL}/museums`, museum);
+  }
+  updateMuseum(museum) {
+    return axios.put(`${API_URL}/museums/${museum.id}`, museum);
+  }
+  deleteMuseums(museums) {
+    return axios.post(`${API_URL}/deletemuseums`, museums);
+  }
+
+  //Paintings
+
+  retrieveAllPaintings(page, limit) {
+    return axios.get(`${API_URL}/paintings?page=${page ?? 0}&limit=${limit}`);
+  }
+  retrievePainting(id) {
+    return axios.get(`${API_URL}/paintings/${id}`);
+  }
+  createPainting(painting) {
+    return axios.post(`${API_URL}/paintings`, painting);
+  }
+  updatePainting(painting) {
+    return axios.put(`${API_URL}/paintings/${painting.id}`, painting);
+  }
+  deletePaintings(paintings) {
+    return axios.post(`${API_URL}/deletepaintings`, paintings);
+  }
+
+  //Users
+
+  retrieveAllUsers(page, limit) {
+    return axios.get(`${API_URL}/users?page=${page ?? 0}&limit=${limit}`);
+  }
+  retrieveUser(id) {
+    return axios.get(`${API_URL}/users/${id}`);
+  }
+  createUser(user) {
+    return axios.post(`${API_URL}/users`, user);
+  }
+  updateUser(user) {
+    return axios.put(`${API_URL}/users/${user.id}`, user);
+  }
+  deleteUsers(users) {
+    return axios.post(`${API_URL}/deleteusers`, users);
+  }
 }
 
 function showError(msg) {

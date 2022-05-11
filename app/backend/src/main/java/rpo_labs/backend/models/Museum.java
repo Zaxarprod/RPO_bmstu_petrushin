@@ -12,6 +12,10 @@ import java.util.Set;
 @Table(name = "museums")
 @Access(AccessType.FIELD)
 public class Museum {
+    public Museum () { }
+    public Museum (long id) {
+        this.id = id;
+    }
 
     @Id
     @Column(name = "id", nullable = false)

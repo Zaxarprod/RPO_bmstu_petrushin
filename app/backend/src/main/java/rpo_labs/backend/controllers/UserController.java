@@ -1,8 +1,12 @@
 package rpo_labs.backend.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.codec.Hex;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -10,37 +14,40 @@ import rpo_labs.backend.models.Museum;
 import rpo_labs.backend.models.User;
 import rpo_labs.backend.repositories.MuseumRepository;
 import rpo_labs.backend.repositories.UserRepository;
+import rpo_labs.backend.tools.DataValidationException;
+import rpo_labs.backend.tools.Utils;
 
 import java.util.*;
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("api/v1")
 public class UserController {
+    // По аналогии здесь используется два репозитория
     @Autowired
-    UserRepository usersRepository;
+    UserRepository userRepository;
 
     @Autowired
     MuseumRepository museumRepository;
 
-    /**
-     * Метод, который возвращает список юзеров (не артистов), которые есть в данной БД
-     * @return - список пользователей в виде JSON
-     */
+
     @GetMapping("/users")
-    public List getAllUsers() {
-        return usersRepository.findAll();
+    public Page<User> getAllUsers(@RequestParam("page") int page, @RequestParam("limit") int limit) {
+        return userRepository.findAll(PageRequest.of(page, limit, Sort.by(Sort.Direction.ASC, "login")));
     }
 
-    /**
-     * Добавляем пользователя
-     * @param users - JSON, который приходит из postman
-     * @return - заголовок (JSON): 200, если ОК, в противном случае, будет ошибка с каким-либо описанием
-     * @throws Exception - обязательное требование
-     */
+    @GetMapping("/users/{id}")
+    public ResponseEntity<User> getUser(@PathVariable(value = "id") Long userId)
+            throws DataValidationException
+    {
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new DataValidationException("Пользователь с таким индексом не найдена"));
+        return ResponseEntity.ok(user);
+    }
+
     @PostMapping("/users")
-    public ResponseEntity<Object> createUsers(@RequestBody User users) throws Exception {
+    public ResponseEntity<Object> createUser(@RequestBody User user) throws Exception {
         try {
-            User nc = usersRepository.save(users);
+            User nc = userRepository.save(user);
             return new ResponseEntity<Object>(nc, HttpStatus.OK);
         } catch (Exception exception) {
             // Указываем тип ошибки
@@ -58,17 +65,12 @@ public class UserController {
         }
     }
 
-    /**
-     * NEW!!! Добавляем музеи для конкретного пользователя. Но добавление осуществляется из-под пользователя
-     * @param userID - ID пользователя, к которому необходимо обратиться
-     * @param museums - список музеев для данного пользователя
-     * @return - Поле cnt возвратит просто, где будет отображено 0, если не добавлено, 1 если добавлено
-     */
+
     @PostMapping("/users/{id}/addmuseums")
     public ResponseEntity<Object> addMuseums(@PathVariable(value = "id") Long userID,
                                              @Validated @RequestBody Set<Museum> museums) {
         // Извлекаем пользователя по конкретному ID-шнику
-        Optional<User> uu = usersRepository.findById(userID);
+        Optional<User> uu = userRepository.findById(userID);
         int cnt = 0;
 
         if (uu.isPresent()) {
@@ -85,7 +87,7 @@ public class UserController {
             }
 
             // Сохраняем
-            usersRepository.save(u);
+            userRepository.save(u);
         }
 
         // Формируем
@@ -95,16 +97,11 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * NEW!!! Метод, который удаляет музей из-под класса пользователя
-     * @param userId - ID по которому собственно должен быть найден
-     * @param museums - Список удаляемых музеев
-     * @return - ответ, который содержит количество удалённых музеев
-     */
+
     @PostMapping("/users/{id}/removemuseums")
     public ResponseEntity<Object> removeMuseums(@PathVariable(value = "id") Long userId,
                                                 @Validated @RequestBody Set<Museum> museums) {
-        Optional<User> uu = usersRepository.findById(userId);
+        Optional<User> uu = userRepository.findById(userId);
         int cnt = 0;
 
         if (uu.isPresent()) {
@@ -114,7 +111,7 @@ public class UserController {
                 ++cnt;
             }
 
-            usersRepository.save(u);
+            userRepository.save(u);
         }
 
         // Формируем ответ
@@ -124,43 +121,44 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Обновляем пользователя
-     * @param userId - ID пользователя
-     * @param userDetails - подробные сведения по пользователю
-     * @return - хедер, где будет содержаться ответ по данному пользователю
-     */
     @PutMapping("/users/{id}")
-    public ResponseEntity<User> updateUsers(@PathVariable(value = "id") Long userId,
-                                             @RequestBody User userDetails) {
-        User user = null;
-        Optional<User> uu = usersRepository.findById(userId);
-        if (uu.isPresent()) {
-            // Заполняем пользовательские данные
-            user = uu.get();
-            user.login = userDetails.login;
+    @CrossOrigin(origins = "http://localhost:3000")
+    public ResponseEntity updateUser(@PathVariable(value = "id") Long userId, @Validated @RequestBody User userDetails)
+            throws DataValidationException
+    {
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new DataValidationException(" Пользователь с таким индексом не найден"));
             user.email = userDetails.email;
-
-            usersRepository.save(user);
+            String np = userDetails.np;
+            if (np != null && !np.isEmpty()) {
+                byte[] b = new byte[32];
+                new Random().nextBytes(b);
+                String salt = new String(Hex.encode(b));
+                user.password = Utils.ComputeHash(np, salt);
+                user.salt = salt;
+            }
+            userRepository.save(user);
             return ResponseEntity.ok(user);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
+        }
+        catch (Exception ex) {
+            String error;
+            if (ex.getMessage().contains("users.email_UNIQUE"))
+                throw new DataValidationException("Пользователь с такой почтой уже есть в базе");
+            else
+                throw new DataValidationException("Неизвестная ошибка");
         }
     }
 
-    /**
-     * Удаляем пользователя
-     * @param userId - ID пользователя
-     * @return - удалено/не удалено
-     */
+
     @DeleteMapping("/users/{id}")
     public ResponseEntity<Object> deleteUsers(@PathVariable(value = "id") Long userId) {
-        Optional<User> users = usersRepository.findById(userId);
+        Optional<User> users = userRepository.findById(userId);
         Map<String, Boolean> resp = new HashMap<>();
 
         // Возвратит true, если объект существует (не пустой)
         if (users.isPresent()) {
-            usersRepository.delete(users.get());
+            userRepository.delete(users.get());
             resp.put("deleted", Boolean.TRUE);
         } else {
             resp.put("deleted", Boolean.FALSE);

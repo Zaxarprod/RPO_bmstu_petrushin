@@ -10,11 +10,14 @@ import java.util.List;
 @Table(name = "artists")
 @Access(AccessType.FIELD)
 public class Artist {
-
+    public Artist() { }
+    public Artist(long id) {
+        this.id = id;
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    public Long id;
+    public long id;
 
     @Column(name = "name", nullable = false)
     public String name;
